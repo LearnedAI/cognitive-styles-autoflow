@@ -1,0 +1,21 @@
+{
+  "version": "1.0.0",
+  "initialized": "2025-08-23T16:30:00Z",
+  "sessions": [],
+  "learning_events": [],
+  "knowledge_acquisition": {
+    "total_nuggets_created": 0,
+    "domains_learned": 0,
+    "last_learning_session": null
+  },
+  "usage_patterns": {
+    "most_accessed_domains": [],
+    "common_task_patterns": [],
+    "context_assembly_frequency": {}
+  },
+  "cumulative_intelligence": {
+    "intelligence_growth_rate": 0,
+    "cross_domain_connections": 0,
+    "expertise_maturation": {}
+  }
+}

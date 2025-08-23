@@ -1,0 +1,32 @@
+{
+  "version": "1.0.0",
+  "last_updated": "2025-08-23T16:30:00Z",
+  "natural_language_mappings": {
+    "authentication": ["login", "auth", "oauth", "jwt", "token", "session", "security", "access control"],
+    "react": ["component", "hook", "state", "jsx", "frontend", "ui", "props", "context"],
+    "databases": ["sql", "postgresql", "mongodb", "queries", "schema", "migration", "orm"],
+    "webrtc": ["video", "audio", "peer", "stream", "media", "rtc", "connection"],
+    "devtools": ["debugging", "testing", "build", "webpack", "vite", "tools", "cli"],
+    "security": ["vulnerability", "encryption", "https", "csrf", "xss", "auth", "secure"],
+    "performance": ["optimization", "speed", "memory", "cpu", "profiling", "metrics"],
+    "typescript": ["types", "interface", "generic", "typing", "ts", "compile"],
+    "nodejs": ["server", "express", "api", "backend", "npm", "package", "module"],
+    "git": ["version control", "commit", "branch", "merge", "repository", "github", "git", "worktree", "parallel"],
+    "docker": ["container", "image", "deployment", "containerization", "dockerfile"],
+    "ai-development": ["llm", "claude", "openai", "prompt", "ai", "automation", "cognitive"]
+  },
+  "phrase_patterns": {
+    "implement.*authentication": ["authentication"],
+    "build.*api": ["nodejs", "authentication", "databases"],
+    "optimize.*performance": ["performance"],
+    "create.*component": ["react", "typescript"],
+    "setup.*database": ["databases"],
+    "debug.*issue": ["devtools"],
+    "deploy.*application": ["docker", "devtools"],
+    "secure.*application": ["security", "authentication"],
+    ".*worktree.*": ["git"],
+    ".*parallel.*development": ["git"],
+    ".*cognitive.*automation": ["ai-development"],
+    ".*output.*style": ["ai-development"]
+  }
+}

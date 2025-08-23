@@ -1,0 +1,28 @@
+{
+    "timestamp": "2025-08-23T12:34:13-04:00",
+    "scores": {
+        "completeness": 65,
+        "risk": 0,
+        "intent": 50,
+        "readiness": 95,
+        "confidence": 79
+    },
+    "weights": {
+        "completeness": 30,
+        "risk": 40,
+        "intent": 20,
+        "readiness": 10
+    },
+    "thresholds": {
+        "high_confidence": 85,
+        "medium_confidence": 70,
+        "low_confidence": 50
+    },
+    "recommendation": "PROCEED_WITH_EXPLANATION",
+    "explanation": {
+        "completeness": "Plan structure and detail assessment",
+        "risk": "Implementation safety and reversibility evaluation",
+        "intent": "User expectation and approval signals analysis",
+        "readiness": "System state and resource availability check"
+    }
+}
