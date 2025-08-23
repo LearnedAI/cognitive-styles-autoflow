@@ -53,8 +53,9 @@ The system uses a file-based signal communication pattern:
 ```
 
 ### Cognitive Style Transitions
+
+#### **Core Workflow Styles (v1.0 - Production Ready)**
 ```bash
-# Core workflow styles
 ./signal-style.sh explore    # Problem understanding + Normal Mode
 ./signal-style.sh think      # Deep cognitive exploration + Plan Mode
 ./signal-style.sh plan       # Strategic architecture + Plan Mode
@@ -66,6 +67,42 @@ The system uses a file-based signal communication pattern:
 ./signal-style.sh normal-mode   # Switch to normal mode
 ./signal-style.sh plan-mode     # Switch to plan mode (no file editing)
 ./signal-style.sh bypass-mode   # Switch to bypass permissions mode
+```
+
+#### **Enhanced Intelligence Commands (v2.0 - Confidence-Based)**
+```bash
+# Confidence-enhanced workflow automation
+./signal-style-enhanced.sh smart-build "<plan_text>"      # Build only if high confidence
+./signal-style-enhanced.sh confident-plan "<plan_text>"  # Plan with confidence assessment
+./signal-style-enhanced.sh auto-implement "<plan_text>"  # Full intelligent workflow
+./signal-style-enhanced.sh explain-build "<plan_text>"   # Build with detailed explanation
+
+# Confidence system utilities
+./signal-style-enhanced.sh confidence-status             # Show confidence system status
+./signal-style-enhanced.sh confidence-test "<text>"      # Test confidence assessment
+
+# Direct confidence assessment and plan mode enhancement
+./intelligent-plan-exit.sh evaluate "<plan_text>"                # Evaluate plan confidence
+./intelligent-plan-exit.sh proceed-if-confident "<plan_text>"    # Auto-proceed if confident
+./intelligent-plan-exit.sh explain-and-proceed "<plan_text>"     # Proceed with explanation
+./intelligent-plan-exit.sh force-approval "<plan_text>"          # Override confidence checks
+```
+
+#### **Git Worktrees for Parallel Development**
+```bash
+# Quick worktree creation with cognitive isolation
+./quick-worktree.sh experimental           # Testing new features
+./quick-worktree.sh performance            # Optimization work
+./quick-worktree.sh research               # New cognitive styles research
+./quick-worktree.sh feature <name>         # Named feature development
+./quick-worktree.sh bugfix <name>          # Bug fixing workflow
+
+# Advanced worktree management
+./manage-worktrees.sh create <name> <branch>    # Create custom worktree
+./manage-worktrees.sh list                      # List all worktrees with status
+./manage-worktrees.sh status                    # Show comprehensive health status
+./manage-worktrees.sh remove <name>             # Remove worktree safely
+./manage-worktrees.sh cleanup                   # Clean up orphaned worktrees
 ```
 
 ### Build and Distribution
@@ -189,6 +226,64 @@ The system achieves:
 - **<50MB Memory Footprint**: Lightweight resource usage
 
 This system represents the world's first successful autonomous cognitive style automation for conversational AI, enabling unprecedented workflow orchestration and productivity enhancement.
+
+## v2.0 Enhanced System Components
+
+The system has been enhanced with breakthrough intelligence features:
+
+### Confidence-Based Automation
+**confidence-assessment.sh** - Multi-dimensional plan evaluation:
+- 4 scoring dimensions: completeness, risk, intent, readiness
+- Mathematical confidence scoring with weighted aggregation
+- Automatic decision making with user transparency
+
+**intelligent-plan-exit.sh** - Enhanced ExitPlanMode integration:
+- Confidence-based plan mode exit decisions
+- Automatic proceed for high confidence (85+)
+- Manual approval required for low confidence (<50)
+
+**signal-style-enhanced.sh** - Intelligent command interface:
+- `smart-build` - Build only if confidence assessment passes
+- `confident-plan` - Plan with confidence assessment
+- `auto-implement` - Full workflow with confidence evaluation
+- Maintains backward compatibility with all original commands
+
+### Persistent Intelligence System
+
+**ModularMOD-KnowledgeSystem.MOD** - Revolutionary persistent intelligence architecture solving context window knowledge loss through modular MOD nuggets and intelligent context assembly.
+
+**CognitiveStyleAutomation.MOD v2.0.0** - Complete system documentation with comprehensive specifications for confidence assessment, Git worktrees integration, and advanced workflow patterns.
+
+## Essential MOD Files for Context Loading
+
+**For future Claude sessions:** Read these MOD files into context for complete system understanding:
+
+### **Primary System Documentation**
+```bash
+# Read for complete system architecture understanding
+cat CognitiveStyleAutomation.MOD
+```
+
+### **Breakthrough Intelligence System**  
+```bash
+# Read for modular MOD knowledge management understanding
+cat ModularMOD-KnowledgeSystem.MOD
+```
+
+### **Current Status**
+```bash
+# Read for current project status and next steps
+cat PROJECT-STATUS-REPORT.txt
+```
+
+### **MOD File Loading Strategy**
+When starting a new session:
+1. Load `CognitiveStyleAutomation.MOD` for complete system context
+2. Load `ModularMOD-KnowledgeSystem.MOD` for persistent intelligence understanding  
+3. Load `PROJECT-STATUS-REPORT.txt` for current development status
+4. Reference this CLAUDE.md file for operational commands and workflows
+
+This provides immediate expert-level understanding of the entire system architecture, breakthrough features, and current development state.
 
 ## File Management Policy
 
