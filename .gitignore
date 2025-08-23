@@ -1,0 +1,108 @@
+# Cognitive Automation System - Git Ignore Rules
+# This file excludes all non-essential files as defined in CLAUDE.md File Management Policy
+
+# Build Artifacts
+*.msi
+*.exe
+*.zip
+*.wix*
+*.wxs
+build-*.ps1
+create-sfx.*
+*.bat
+CognitiveAutomation*
+build-*
+create-windows-installer.ps1
+
+# Development/Debug Files  
+test-*.ps1
+test-*.sh
+timing-logs/
+*.log
+start-*.ps1
+stop-*.ps1
+run-*.ps1
+service-status.ps1
+check-service.sh
+change-style*.sh
+
+# Research/Analysis Files
+research-*
+experiment-*
+*.html
+ai_docs/
+cognitive-automation-system/
+timing-optimization-results.md
+software-engineering-styles.md
+styles_guide_summary.md
+orchestrate.md
+claude-style-automation.md
+
+# Historical/Backup Files
+backups/
+StyleService-Round*.ps1
+StyleService-Enhanced.ps1
+StyleService-RaceProof.ps1
+StyleService.ps1
+*.timestamp
+*.bak
+
+# Generated Content & Installers
+dist/
+output/
+temp/
+tmp/
+distribution/
+sfx-source/
+*.sed
+*Installer*.ps1
+*License*.rtf
+SFX-INSTALLER-README.md
+MANUAL-SFX-CREATION.md
+WIX-MSI-INSTALLER-GUIDE.md
+ENHANCED-SYSTEM-GUIDE.md
+FIREGIANT-BUILD-SUCCESS.md
+FIREGIANT-WIX-IMPLEMENTATION.md
+COGNITIVE-AUTONOMY-COMPLETE.md
+Set-ClaudeStyle.ps1
+Installer.png
+BuildWithClaude.webp
+
+# OS and IDE Files
+.DS_Store
+Thumbs.db
+*.tmp
+*.temp
+*~
+
+# PowerShell and Windows
+*.ps1xml
+*.ps1.bak
+*.psd1.bak
+
+# Development Tools
+.vscode/
+.idea/
+*.swp
+*.swo
+__pycache__/
+*.pyc
+
+# Runtime Files
+.style-service.*
+.service-pid
+.mode-state
+.global-lock
+
+# Claude Configuration (not essential for system)
+.claude/
+
+# Processed Signal Files (runtime generated)
+style-signals/processed/*
+style-signals/processing/*
+style-signals/queue/*
+
+# Keep directory structure but ignore contents
+!style-signals/processed/.gitkeep
+!style-signals/processing/.gitkeep
+!style-signals/queue/.gitkeep
