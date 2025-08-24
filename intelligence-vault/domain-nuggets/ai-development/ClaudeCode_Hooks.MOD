@@ -27,9 +27,9 @@
         "preservation": "zero_information_loss",
         "optimization": "mod_format_for_llm_consumption",
         "integration": "cognitive_automation_ready",
-        "concepts_covered": "Quickstart,Step 1: Open hooks configuration,Step 2: Add a matcher,Step 3: Add the hook,Step 4: Save your configuration,Step 5: Verify your hook,Configuration,Structure,Hook Events,PreToolUse",
-        "code_examples": 36,
-        "reference_tables": 10
+        "concepts_covered": "Quickstart,Step 1: Open hooks configuration,Step 2: Add a matcher,Step 3: Add the hook,Step 4: Save your configuration,Step 5: Verify your hook,Configuration,Structure,Hook Events,PreToolUse,PostToolUse,Notification,Stop,SubagentStop,PreCompact,SessionStart,UserPromptSubmit,SessionEnd,Hook Input,Hook Output,MCP Tools,Examples,Security Considerations,Debugging",
+        "code_examples": 42,
+        "reference_tables": 11
       }
     </quick-example>
   </overview>
@@ -237,6 +237,33 @@ Runs before Claude Code is about to run a compact operation.
 * `manual` - Invoked from `/compact`
 * `auto` - Invoked from auto-compact (due to full context window)
 
+### SessionStart
+
+Runs when Claude Code starts a new session or resumes an existing session.
+
+Useful for loading in development context like existing issues or recent changes.
+
+**Matchers:**
+
+* `startup` - Invoked from startup
+* `resume` - Invoked from `--resume`, `--continue`, or `/resume`
+* `clear` - Invoked from `/clear`
+
+### UserPromptSubmit
+
+Runs when the user submits a prompt, before Claude processes it.
+
+Allows:
+* Adding context
+* Validating prompts
+* Blocking certain prompt types
+
+### SessionEnd
+
+Runs when a Claude Code session ends.
+
+Useful for cleanup tasks, logging session statistics, or saving session state.
+
 ## Hook Input
 
 Hooks receive JSON data via stdin containing session information and
@@ -333,6 +360,39 @@ For `manual`, `custom_instructions` comes from what the user passes into
 }
 \`\`\`
 
+### SessionStart Input
+
+\`\`\`json
+{
+  "session_id": "abc123",
+  "transcript_path": "~/.claude/projects/.../00893aaf-19fa-41d2-8238-13269b9b3ca0.jsonl",
+  "hook_event_name": "SessionStart",
+  "source": "startup"
+}
+\`\`\`
+
+### UserPromptSubmit Input
+
+\`\`\`json
+{
+  "session_id": "abc123",
+  "transcript_path": "~/.claude/projects/.../00893aaf-19fa-41d2-8238-13269b9b3ca0.jsonl",
+  "hook_event_name": "UserPromptSubmit",
+  "prompt": "Write a function to calculate factorial"
+}
+\`\`\`
+
+### SessionEnd Input
+
+\`\`\`json
+{
+  "session_id": "abc123",
+  "transcript_path": "~/.claude/projects/.../00893aaf-19fa-41d2-8238-13269b9b3ca0.jsonl",
+  "hook_event_name": "SessionEnd",
+  "reason": "clear"
+}
+\`\`\`
+
 ## Hook Output
 
 There are two ways for hooks to return output back to Claude Code. The output
@@ -356,14 +416,17 @@ Hooks communicate status through exit codes, stdout, and stderr:
 
 #### Exit Code 2 Behavior
 
-| Hook Event     | Behavior                                        |
-| -------------- | ----------------------------------------------- |
-| `PreToolUse`   | Blocks the tool call, shows error to Claude     |
-| `PostToolUse`  | Shows error to Claude (tool already ran)        |
-| `Notification` | N/A, shows stderr to user only                  |
-| `Stop`         | Blocks stoppage, shows error to Claude          |
-| `SubagentStop` | Blocks stoppage, shows error to Claude subagent |
-| `PreCompact`   | N/A, shows stderr to user only                  |
+| Hook Event        | Behavior                                        |
+| ----------------- | ----------------------------------------------- |
+| `PreToolUse`      | Blocks the tool call, shows error to Claude     |
+| `PostToolUse`     | Shows error to Claude (tool already ran)        |
+| `Notification`    | N/A, shows stderr to user only                  |
+| `Stop`            | Blocks stoppage, shows error to Claude          |
+| `SubagentStop`    | Blocks stoppage, shows error to Claude subagent |
+| `PreCompact`      | N/A, shows stderr to user only                  |
+| `SessionStart`    | Shows error to user only                        |
+| `UserPromptSubmit`| Blocks prompt processing, shows error to Claude |
+| `SessionEnd`      | N/A, shows stderr to user only                  |
 
 ### Advanced: JSON Output
 
@@ -437,6 +500,37 @@ to Claude.
 {
   "decision": "block" | undefined,
   "reason": "Must be provided when Claude is blocked from stopping"
+}
+\`\`\`
+
+#### `SessionStart` Additional Context
+
+`SessionStart` hooks can add context to the session.
+
+\`\`\`json
+{
+  "hookSpecificOutput": {
+    "hookEventName": "SessionStart",
+    "additionalContext": "My additional context here"
+  }
+}
+\`\`\`
+
+#### `UserPromptSubmit` Decision Control
+
+`UserPromptSubmit` hooks can control whether a prompt is processed and add context.
+
+* "block" prevents the prompt from being processed. `reason` is shown to the user.
+* `undefined` allows normal processing. `reason` is ignored.
+
+\`\`\`json
+{
+  "decision": "block" | undefined,
+  "reason": "Explanation for blocking",
+  "hookSpecificOutput": {
+    "hookEventName": "UserPromptSubmit",
+    "additionalContext": "Optional context to add"
+  }
 }
 \`\`\`
 
