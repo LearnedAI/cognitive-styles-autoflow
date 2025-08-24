@@ -19,6 +19,8 @@
 
     This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository using breakthrough MOD format optimization for enhanced LLM consumption while maintaining .md extension compatibility.
 
+    **🔥 SESSION STARTUP REQUIREMENT**: Display knowledge status immediately to show available expertise.
+
     <quick-example format="json" scenario="system-capabilities">
       {
         "system": "Cognitive Automation System (CAS)",
@@ -207,6 +209,47 @@
       </examples>
     </concept>
   </concepts>
+
+  <session-initialization>
+    <concept id="knowledge-status-display" type="operational">
+      <definition>
+        ## Session Knowledge Status Display
+
+        **CRITICAL**: At the start of each Claude Code session, display the current knowledge status to provide immediate visibility into available expertise and system capabilities.
+      </definition>
+      <examples category="status-display">
+        <example scenario="session-startup" complexity="1">
+          <description>Display comprehensive knowledge status at session start</description>
+          <code format="bash">
+            {
+              "display_command": "echo '=== COGNITIVE AUTOMATION SYSTEM v2.1 - KNOWLEDGE STATUS ==='",
+              "intelligence_vault_status": "./check-knowledge-coverage.sh status-summary",
+              "display_table": {
+                "format": "terminal_table",
+                "columns": ["Domain", "Nuggets", "Coverage", "Official_Backing"],
+                "data": [
+                  ["ai-development", "26", "126+ areas", "100% Anthropic"],
+                  ["git", "1", "4 areas", "100% Official"],
+                  ["authentication", "1", "2 areas", "100% Official"],
+                  ["TOTAL", "28", "130+ areas", "100% Official"]
+                ]
+              },
+              "system_status": {
+                "cognitive_automation": "ACTIVE",
+                "intelligence_vault": "LOADED",
+                "confidence_assessment": "5-DIMENSIONAL",
+                "parallel_development": "WORKTREES_READY"
+              }
+            }
+          </code>
+          <expected-result>Clear visibility of available expertise and system readiness</expected-result>
+        </example>
+      </examples>
+      <implementation-requirement>
+        **MANDATORY**: This knowledge status display MUST be shown at the beginning of every Claude Code session to ensure transparency of available expertise and system capabilities.
+      </implementation-requirement>
+    </concept>
+  </session-initialization>
 
   <implementation-guide>
     <step-by-step>
