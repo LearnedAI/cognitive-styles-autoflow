@@ -2,7 +2,15 @@
 
 ## Automatic Setup via Claude Code UI
 
-1. **Open Hooks Configuration**
+### Method 1: Using Cognitive Automation Signal
+1. **Open Hooks Configuration via Signal**
+   ```bash
+   ./signal-hooks.sh
+   ```
+   This uses our cognitive automation system to execute `/hooks` command automatically.
+
+### Method 2: Manual Command
+1. **Open Hooks Configuration Manually**
    ```bash
    /hooks
    ```
