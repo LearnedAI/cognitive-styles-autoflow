@@ -1,16 +1,8 @@
 # Setup Knowledge Status SessionStart Hook
 
-## Automatic Setup via Claude Code UI
+## Setup via Claude Code UI
 
-### Method 1: Using Cognitive Automation Signal
-1. **Open Hooks Configuration via Signal**
-   ```bash
-   ./signal-hooks.sh
-   ```
-   This uses our cognitive automation system to execute `/hooks` command automatically.
-
-### Method 2: Manual Command
-1. **Open Hooks Configuration Manually**
+1. **Open Hooks Configuration**
    ```bash
    /hooks
    ```
