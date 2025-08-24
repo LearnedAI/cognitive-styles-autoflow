@@ -42,43 +42,64 @@ readonly CONTEXT_ICON="🧠"
 readonly FULL_BLOCK="█"
 readonly EMPTY_BLOCK="░"
 
-# OPTIMIZATION 1: Single JSON extraction (simplified for Sonnet 4 only)
+# OPTIMIZATION 1: Minimal JSON extraction for core info only
 extract_session_data() {
     echo "$input" | jq -r '. as $root | {
         output_style: ($root.output_style.name // "default"),
         current_dir: ($root.workspace.current_dir // "'$(pwd)'"),
         transcript_path: ($root.transcript_path // ""),
-        session_id: ($root.session_id // "")
+        version: ($root.version // "1.0.80")
     }'
 }
 
-# OPTIMIZATION 2: Claude Pro subscription detection
-is_claude_pro_user() {
-    # For Claude Pro users, we should hide cost regardless of the value
-    # since you mentioned having Claude Pro subscription
-    # TODO: Add more sophisticated detection if needed
-    return 0  # Always return true for now since user has Claude Pro
+# Style emoji mapping for visual enhancement
+get_style_emoji() {
+    local style="$1"
+    case "$style" in
+        "explore") echo "🔍" ;;
+        "think") echo "🤔" ;;
+        "plan") echo "📋" ;;
+        "build") echo "🔨" ;;
+        "test") echo "🧪" ;;
+        "review") echo "👀" ;;
+        "documentation") echo "📚" ;;
+        "default") echo "⚡" ;;
+        *) echo "🎯" ;;
+    esac
 }
 
-# OPTIMIZATION 3: Context calculation (Sonnet 4 - 200K tokens)
+# Accurate context estimation (based on real-world validation)
 calculate_context_usage() {
-    local session_id=$(echo "$session_data" | jq -r '.session_id')
     local max_tokens=200000  # Sonnet 4 context window
-    
-    # Get actual context usage from transcript
-    local transcript_path=$(echo "$session_data" | jq -r '.transcript_path')
     local current_tokens=0
+    local percentage=0
+    
+    # Get transcript file for estimation
+    local transcript_path=$(echo "$session_data" | jq -r '.transcript_path')
     
     if [[ -f "$transcript_path" ]]; then
-        local char_count=$(wc -c < "$transcript_path" 2>/dev/null || echo "0")
-        # Improved estimation: 3.5 chars per token
-        current_tokens=$((char_count / 4))
-    fi
-    
-    # Calculate percentage
-    local percentage=0
-    if [[ $max_tokens -gt 0 ]]; then
+        local file_size=$(wc -c < "$transcript_path" 2>/dev/null || echo "0")
+        
+        # Fine-tuned estimation based on multiple real-world validations:
+        # - Validation 1: 104% → auto-compact appeared  
+        # - Validation 2: 73% statusline = 88% actual (underestimated by 15%)
+        # - Validation 3: 94% statusline = 89% actual (overestimated by 5%)
+        # - Sweet spot: 4.0 chars per token with 22% JSON overhead
+        local content_chars=$((file_size * 78 / 100))
+        current_tokens=$((content_chars / 4))  # 4.0 chars per token
+        
+        # Calculate realistic percentage
         percentage=$((current_tokens * 100 / max_tokens))
+        
+        # Sanity check - don't exceed 100%
+        if [[ $percentage -gt 100 ]]; then
+            percentage=100
+            current_tokens=$max_tokens
+        fi
+    else
+        # No transcript available - minimal usage
+        current_tokens=5000
+        percentage=2
     fi
     
     echo "$current_tokens:$max_tokens:$percentage"
@@ -101,47 +122,32 @@ create_context_bar() {
     echo "$bar"
 }
 
-# OPTIMIZATION 5: Streamlined git info (performance focused)
-get_git_status() {
-    if git rev-parse --git-dir &>/dev/null; then
-        local branch=$(git branch --show-current 2>/dev/null || echo "detached")
-        local status=""
-        
-        # Quick dirty check (faster than git diff)
-        if ! git diff --quiet 2>/dev/null; then
-            status="*"
-        fi
-        
-        echo "${branch}${status}"
-    fi
+# Claude Code version display with robot emoji
+get_claude_version() {
+    local version=$(echo "$session_data" | jq -r '.version')
+    echo "🤖 v${version}"
 }
 
-# OPTIMIZATION 6: Enhanced cognitive automation status (with fallback)
+# Simplified automation status (red/green)
 get_automation_status() {
     if [[ -x "./cognitive-automation-status.sh" ]]; then
         local result=$(./cognitive-automation-status.sh "compact" 2>/dev/null)
         if [[ -n "$result" ]]; then
             local icon=$(echo "$result" | cut -d: -f1)
-            local status=$(echo "$result" | cut -d: -f2)
-            echo "${icon} ${status}"
+            echo "${icon}"
             return
         fi
     fi
     
-    # Fallback: simple process check
+    # Fallback: simple process check with red/green
     if pgrep -f "StyleService" >/dev/null 2>&1; then
-        echo "${AUTOMATION_ACTIVE} Active"
+        echo "${AUTOMATION_ACTIVE}"
     else
-        echo "${AUTOMATION_INACTIVE} Off"
+        echo "${AUTOMATION_INACTIVE}"
     fi
 }
 
-# OPTIMIZATION 7: Claude Pro display (no cost tracking needed)
-format_subscription_info() {
-    echo "Pro"  # Simple Pro indicator for Claude Pro subscription
-}
-
-# OPTIMIZATION 8: Main statusline generation (simplified for Sonnet 4 + Claude Pro)
+# Main statusline generation (simplified and focused)
 generate_statusline() {
     # Single data extraction
     session_data=$(extract_session_data)
@@ -156,11 +162,11 @@ generate_statusline() {
     local max_tokens=$(echo "$context_info" | cut -d: -f2)
     local percentage=$(echo "$context_info" | cut -d: -f3)
     
-    # Format components
+    # Get components
     local dir_name=$(basename "$current_dir" 2>/dev/null || echo "unknown")
-    local git_info=$(get_git_status)
+    local style_emoji=$(get_style_emoji "$output_style")
     local automation_status=$(get_automation_status)
-    local subscription_info=$(format_subscription_info)
+    local claude_version=$(get_claude_version)
     
     # Context visualization
     local progress_bar=$(create_context_bar "$percentage")
@@ -175,17 +181,13 @@ generate_statusline() {
     local current_k=$((current_tokens / 1000))
     local max_k=$((max_tokens / 1000))
     
-    # Build statusline components (no model display needed - always Sonnet 4)
-    local style_display="[${BOLD}${output_style}${NC}]"
+    # Build clean, focused statusline
+    local style_display="${style_emoji} [${BOLD}${output_style}${NC}]"
     local project_display="${FOLDER_ICON} ${dir_name}"
-    local git_display=""
-    if [[ -n "$git_info" ]]; then
-        git_display=" │ ${BRANCH_ICON} ${git_info}"
-    fi
     local context_display="${CONTEXT_ICON} ${context_color}${progress_bar} ${percentage}%${NC} (${current_k}K/${max_k}K)"
     
-    # Generate final statusline (simplified - no model name, Pro subscription)
-    echo -e "${style_display} │ ${project_display}${git_display} │ ${context_display} │ ${automation_status} │ ${COST_ICON} ${subscription_info}"
+    # Generate final statusline: Style │ Project │ Context │ Automation │ Version
+    echo -e "${style_display} │ ${project_display} │ ${context_display} │ ${automation_status} │ ${claude_version}"
 }
 
 # Execute main function
