@@ -80,13 +80,14 @@ calculate_context_usage() {
     if [[ -f "$transcript_path" ]]; then
         local file_size=$(wc -c < "$transcript_path" 2>/dev/null || echo "0")
         
-        # Fine-tuned estimation based on multiple real-world validations:
+        # Final calibration based on complete validation set:
         # - Validation 1: 104% → auto-compact appeared  
         # - Validation 2: 73% statusline = 88% actual (underestimated by 15%)
         # - Validation 3: 94% statusline = 89% actual (overestimated by 5%)
-        # - Sweet spot: 4.0 chars per token with 22% JSON overhead
-        local content_chars=$((file_size * 78 / 100))
-        current_tokens=$((content_chars / 4))  # 4.0 chars per token
+        # - Validation 4: 100% statusline = 95% actual (overestimated by 5%)
+        # - Final parameters: 4.2 chars per token with 80% content ratio
+        local content_chars=$((file_size * 80 / 100))
+        current_tokens=$((content_chars * 10 / 42))  # 4.2 chars per token
         
         # Calculate realistic percentage
         percentage=$((current_tokens * 100 / max_tokens))
@@ -122,10 +123,10 @@ create_context_bar() {
     echo "$bar"
 }
 
-# Claude Code version display with robot emoji
+# Claude Code version display as simple text label
 get_claude_version() {
     local version=$(echo "$session_data" | jq -r '.version')
-    echo "🤖 v${version}"
+    echo "v${version}"
 }
 
 # Simplified automation status (red/green)
@@ -168,26 +169,29 @@ generate_statusline() {
     local automation_status=$(get_automation_status)
     local claude_version=$(get_claude_version)
     
-    # Context visualization
-    local progress_bar=$(create_context_bar "$percentage")
+    # Calculate remaining percentage and set color based on remaining space
+    local remaining=$((100 - percentage))
     local context_color="$GREEN"
-    if [[ $percentage -gt 80 ]]; then
-        context_color="$RED"
-    elif [[ $percentage -gt 60 ]]; then
-        context_color="$PEACH"
+    local warning_symbol=""
+    
+    if [[ $remaining -lt 45 ]]; then
+        context_color="$BOLD$RED"  # Bold dark red for danger zone
+        warning_symbol="⚠️ "
+    elif [[ $remaining -lt 60 ]]; then
+        context_color="$RED"  # Red for 45-59% remaining
+    elif [[ $remaining -lt 75 ]]; then
+        context_color="$YELLOW"  # Orange/yellow for 60-74% remaining
+    else
+        context_color="$GREEN"  # Green for 75-100% remaining
     fi
     
-    # Format token display
-    local current_k=$((current_tokens / 1000))
-    local max_k=$((max_tokens / 1000))
-    
     # Build clean, focused statusline
-    local style_display="${style_emoji} [${BOLD}${output_style}${NC}]"
+    local style_display="${style_emoji}"
     local project_display="${FOLDER_ICON} ${dir_name}"
-    local context_display="${CONTEXT_ICON} ${context_color}${progress_bar} ${percentage}%${NC} (${current_k}K/${max_k}K)"
+    local context_display="${warning_symbol}${CONTEXT_ICON} ${context_color}${remaining}%${NC}"
     
     # Generate final statusline: Style │ Project │ Context │ Automation │ Version
-    echo -e "${style_display} │ ${project_display} │ ${context_display} │ ${automation_status} │ ${claude_version}"
+    echo -e "${style_display} │ ${project_display} │ ${context_display} │ 📶 ${automation_status} │ ${claude_version}"
 }
 
 # Execute main function
