@@ -246,7 +246,7 @@
         </example>
       </examples>
       <implementation-requirement>
-        **TRIGGER PHRASES**: Respond to user requests like "knowledge status", "show vault", "what expertise is loaded", "intelligence status", or "show available knowledge" by displaying the comprehensive status table.
+        **AUTOMATIC DISPLAY**: SessionStart hook automatically displays knowledge status on session startup. Also responds to user requests like "knowledge status", "show vault", "what expertise is loaded", "intelligence status", or "show available knowledge".
       </implementation-requirement>
     </concept>
   </session-initialization>

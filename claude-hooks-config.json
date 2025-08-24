@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/mnt/c/Users/Learn/Greenfield/session-startup-knowledge-hook.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

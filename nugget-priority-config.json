@@ -1,0 +1,57 @@
+{
+  "auto_load_nuggets": {
+    "description": "Essential nuggets loaded automatically at session start",
+    "priority": "high",
+    "nuggets": [
+      "ClaudeCode_Overview.MOD",
+      "ClaudeCode_Quickstart.MOD", 
+      "ClaudeCode_Common_Workflows.MOD",
+      "ClaudeCode-OutputStyles.MOD",
+      "ClaudeCode_OutputStyles_Official.MOD",
+      "ClaudeCode_SlashCommands.MOD",
+      "ClaudeCode_Settings.MOD",
+      "ClaudeCode_Hooks.MOD",
+      "ClaudeCode_Memory.MOD",
+      "ClaudeCode_CLI_Reference.MOD",
+      "GitWorktrees-ParallelDevelopment.MOD"
+    ],
+    "total": 11
+  },
+  "on_demand_nuggets": {
+    "description": "Specialized nuggets loaded only when relevant tasks detected",
+    "priority": "medium",
+    "nuggets": [
+      "ClaudeCode_IDE_Integrations.MOD",
+      "ClaudeCode_Sub_agents.MOD", 
+      "ClaudeCode_Mcp.MOD",
+      "ClaudeCode_Interactive_mode.MOD",
+      "ClaudeCode_Troubleshooting.MOD",
+      "OAuth2-AuthorizationFlow.MOD"
+    ],
+    "total": 6
+  },
+  "rare_use_nuggets": {
+    "description": "Enterprise/specialized nuggets loaded only on explicit request",
+    "priority": "low",
+    "nuggets": [
+      "ClaudeCode_Setup.MOD",
+      "ClaudeCode_Security.MOD",
+      "ClaudeCode_Iam.MOD",
+      "ClaudeCode_Costs.MOD",
+      "ClaudeCode_Monitoring_usage.MOD",
+      "ClaudeCode_Data_Usage.MOD",
+      "ClaudeCode_Devcontainer.MOD",
+      "ClaudeCode_Github_actions.MOD",
+      "ClaudeCode_Llm_gateway.MOD",
+      "ClaudeCode_Sdk.MOD",
+      "ClaudeCode_Third_party_integrations.MOD"
+    ],
+    "total": 11
+  },
+  "loading_strategy": {
+    "session_start": "auto_load_nuggets",
+    "task_detection": "on_demand_nuggets", 
+    "explicit_request": "rare_use_nuggets",
+    "context_window_management": "prioritize_auto_load_first"
+  }
+}
