@@ -19,7 +19,7 @@
 
     This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository using breakthrough MOD format optimization for enhanced LLM consumption while maintaining .md extension compatibility.
 
-    **🔥 SESSION STARTUP REQUIREMENT**: Display knowledge status immediately to show available expertise.
+    **📋 KNOWLEDGE STATUS AVAILABLE**: Use 'knowledge status' or 'show vault' to display available expertise.
 
     <quick-example format="json" scenario="system-capabilities">
       {
@@ -213,13 +213,13 @@
   <session-initialization>
     <concept id="knowledge-status-display" type="operational">
       <definition>
-        ## Session Knowledge Status Display
+        ## Knowledge Status Display
 
-        **CRITICAL**: At the start of each Claude Code session, display the current knowledge status to provide immediate visibility into available expertise and system capabilities.
+        **ON REQUEST**: When user asks for 'knowledge status', 'show vault', or similar, display the current knowledge status to provide visibility into available expertise and system capabilities.
       </definition>
       <examples category="status-display">
-        <example scenario="session-startup" complexity="1">
-          <description>Display comprehensive knowledge status at session start</description>
+        <example scenario="user-requested-status" complexity="1">
+          <description>Display comprehensive knowledge status when requested by user</description>
           <code format="bash">
             {
               "display_command": "echo '=== COGNITIVE AUTOMATION SYSTEM v2.1 - KNOWLEDGE STATUS ==='",
@@ -246,7 +246,7 @@
         </example>
       </examples>
       <implementation-requirement>
-        **MANDATORY**: This knowledge status display MUST be shown at the beginning of every Claude Code session to ensure transparency of available expertise and system capabilities.
+        **TRIGGER PHRASES**: Respond to user requests like "knowledge status", "show vault", "what expertise is loaded", "intelligence status", or "show available knowledge" by displaying the comprehensive status table.
       </implementation-requirement>
     </concept>
   </session-initialization>
