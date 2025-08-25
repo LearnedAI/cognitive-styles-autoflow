@@ -12,7 +12,8 @@ if [ -z "$1" ]; then
     echo ""
     echo "Coordinated Style+Mode Commands (Automatic Pairing):"
     echo ""
-    echo "  STRATEGIC COGNITIVE WORKFLOW (Core Triad):"
+    echo "  STRATEGIC COGNITIVE WORKFLOW (Enhanced Quartet):"
+    echo "  mapper      - Mapper style + Plan Mode (2) - Advanced roadmap construction with MOD docs"
     echo "  think       - Think style + Plan Mode (2) - Deep cognitive exploration, no distractions"
     echo "  plan        - Plan style + Plan Mode (2) - Strategic architecture, pure planning"
     echo "  build       - Build style + Bypass Mode (3) - Full implementation with permissions"
@@ -31,6 +32,16 @@ if [ -z "$1" ]; then
     echo "Utility Commands:"
     echo "  check-mode    - Show current interface mode"
     echo "  reset-mode    - Reset to normal mode (emergency)"
+    echo "  context       - Display detailed context usage (/context)"
+    echo "  help          - Show Claude Code help (/help)"
+    echo "  prime         - Load project context (/prime)"
+    echo "  compact       - Compact conversation (/compact)"
+    echo ""
+    echo "Direct Slash Commands (NEW!):"
+    echo "  /context      - Send /context directly"
+    echo "  /help         - Send /help directly" 
+    echo "  /prime        - Send /prime directly"
+    echo "  /any-command  - Send any slash command directly"
     echo ""
     echo "Complete Autonomous Workflow Examples:"
     echo "  ./signal-style.sh think        # → /output-style think + Plan Mode (2)"
@@ -39,6 +50,8 @@ if [ -z "$1" ]; then
     echo "  ./signal-style.sh explore      # → /output-style explore + Normal Mode (0)"
     echo "  ./signal-style.sh test         # → /output-style test + Accept Mode (1)"
     echo "  ./signal-style.sh review       # → /output-style review + Normal Mode (0)"
+    echo "  ./signal-style.sh context      # → /context"
+    echo "  ./signal-style.sh /context     # → /context (direct slash command)"
     echo ""
     echo "Mode Details:"
     echo "  Mode 0 (Normal): Full editing, shows '? for shortcuts'"
@@ -56,25 +69,53 @@ SIGNAL_FILE="$SIGNAL_DIR/$COMMAND.signal"
 mkdir -p "$SIGNAL_DIR"
 
 # Validate command type and create appropriate signal
-STYLE_COMMANDS=("explore" "think" "plan" "build" "test" "review")
+STYLE_COMMANDS=("explore" "think" "plan" "build" "test" "review" "mapper")
 MODE_COMMANDS=("normal-mode" "accept-mode" "plan-mode" "bypass-mode" "check-mode" "reset-mode")
+BUILTIN_SLASH_COMMANDS=("context" "help" "prime" "compact")
 
 # Check if command is valid
 VALID_COMMAND=false
-for cmd in "${STYLE_COMMANDS[@]}"; do
-    if [ "$COMMAND" = "$cmd" ]; then
-        VALID_COMMAND=true
-        break
-    fi
-done
+COMMAND_TYPE=""
 
-if [ "$VALID_COMMAND" = false ]; then
-    for cmd in "${MODE_COMMANDS[@]}"; do
+# Check for direct slash commands (starts with /)
+if [[ "$COMMAND" == /* ]]; then
+    VALID_COMMAND=true
+    COMMAND_TYPE="direct-slash"
+    echo "Direct slash command: $COMMAND" > "$SIGNAL_FILE"
+else
+    # Check style commands
+    for cmd in "${STYLE_COMMANDS[@]}"; do
         if [ "$COMMAND" = "$cmd" ]; then
             VALID_COMMAND=true
+            COMMAND_TYPE="style"
+            echo "Style change request: $COMMAND" > "$SIGNAL_FILE"
             break
         fi
     done
+    
+    # Check builtin slash commands (named without /)
+    if [ "$VALID_COMMAND" = false ]; then
+        for cmd in "${BUILTIN_SLASH_COMMANDS[@]}"; do
+            if [ "$COMMAND" = "$cmd" ]; then
+                VALID_COMMAND=true
+                COMMAND_TYPE="builtin-slash"
+                echo "Builtin slash command: $COMMAND" > "$SIGNAL_FILE"
+                break
+            fi
+        done
+    fi
+    
+    # Check mode commands
+    if [ "$VALID_COMMAND" = false ]; then
+        for cmd in "${MODE_COMMANDS[@]}"; do
+            if [ "$COMMAND" = "$cmd" ]; then
+                VALID_COMMAND=true
+                COMMAND_TYPE="mode"
+                echo "Mode change request: $COMMAND" > "$SIGNAL_FILE"
+                break
+            fi
+        done
+    fi
 fi
 
 if [ "$VALID_COMMAND" = false ]; then
@@ -83,9 +124,21 @@ if [ "$VALID_COMMAND" = false ]; then
     exit 1
 fi
 
-# Create signal file for the background service
-if [[ " ${STYLE_COMMANDS[@]} " =~ " ${COMMAND} " ]]; then
-    echo "Style change request: $COMMAND" > "$SIGNAL_FILE"
-else
-    echo "Mode change request: $COMMAND" > "$SIGNAL_FILE"
-fi
+# Provide feedback about what will be executed
+case "$COMMAND_TYPE" in
+    "style")
+        echo "✅ Signal created: $COMMAND → /output-style $COMMAND + coordinated mode"
+        ;;
+    "builtin-slash")
+        echo "✅ Signal created: $COMMAND → /$COMMAND"
+        ;;
+    "direct-slash")
+        echo "✅ Signal created: $COMMAND → $COMMAND"
+        ;;
+    "mode")
+        echo "✅ Signal created: $COMMAND → mode change"
+        ;;
+esac
+
+echo "📁 Signal file: $(basename "$SIGNAL_FILE")"
+echo "🎯 Background service will process this command automatically"

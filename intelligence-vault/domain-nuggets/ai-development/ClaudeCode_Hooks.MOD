@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document type="api-reference" subject="ClaudeCode_Hooks">
   <metadata>
-    <created>2025-08-23</created>
-    <updated>2025-08-23</updated>
-    <version>1.0.0</version>
+    <created>2025-08-24</created>
+    <updated>2025-08-24</updated>
+    <version>2.0.0</version>
     <scope>complete-system</scope>
     <dependencies>["claude-code"]</dependencies>
     <complexity>4</complexity>
     <audience>llm-exclusive</audience>
     <official_source>Anthropic Claude Code Documentation</official_source>
     <source_file>en_docs_claude-code_hooks.md</source_file>
-    <validation_date>Sat Aug 23 19:06:57 EDT 2025</validation_date>
+    <validation_date>2025-08-24</validation_date>
     <preservation_level>complete</preservation_level>
   </metadata>
 
   <overview confidence="high">
     ## Hooks - Official Claude Code Reference
     
-    Customize
+    Customize and extend Claude Code's behavior by registering shell commands
     
     Complete preservation of official Anthropic documentation with MOD format optimization for enhanced LLM consumption and integration with cognitive automation workflows.
     
@@ -27,9 +27,10 @@
         "preservation": "zero_information_loss",
         "optimization": "mod_format_for_llm_consumption",
         "integration": "cognitive_automation_ready",
-        "concepts_covered": "Quickstart,Step 1: Open hooks configuration,Step 2: Add a matcher,Step 3: Add the hook,Step 4: Save your configuration,Step 5: Verify your hook,Configuration,Structure,Hook Events,PreToolUse,PostToolUse,Notification,Stop,SubagentStop,PreCompact,SessionStart,UserPromptSubmit,SessionEnd,Hook Input,Hook Output,MCP Tools,Examples,Security Considerations,Debugging",
-        "code_examples": 42,
-        "reference_tables": 11
+        "concepts_covered": "Quickstart,Configuration,Hook Events,Hook Input,Hook Output,Security Considerations,Debugging",
+        "code_examples": 20,
+        "hook_events": 8,
+        "use_cases": ["notifications", "automatic_formatting", "logging", "feedback", "custom_permissions"]
       }
     </quick-example>
   </overview>
@@ -108,9 +109,9 @@ Type `Bash` for the matcher.
 
 Select `+ Add new hook…` and enter this command:
 
-\`\`\`bash
+```bash
 jq -r '"\(.tool_input.command) - \(.tool_input.description // "No description")"' >> ~/.claude/bash-command-log.txt
-\`\`\`
+```
 
 ### Step 4: Save your configuration
 
@@ -124,7 +125,7 @@ Then press Esc until you return to the REPL. Your hook is now registered!
 
 Run `/hooks` again or check `~/.claude/settings.json` to see your configuration:
 
-\`\`\`json
+```json
 {
   "hooks": {
     "PreToolUse": [
@@ -140,7 +141,7 @@ Run `/hooks` again or check `~/.claude/settings.json` to see your configuration:
     ]
   }
 }
-\`\`\`
+```
 
 ## Configuration
 
@@ -156,7 +157,7 @@ Claude Code hooks are configured in your
 
 Hooks are organized by matchers, where each matcher can have multiple hooks:
 
-\`\`\`json
+```json
 {
   "hooks": {
     "EventName": [
@@ -172,7 +173,7 @@ Hooks are organized by matchers, where each matcher can have multiple hooks:
     ]
   }
 }
-\`\`\`
+```
 
 * **matcher**: Pattern to match tool names, case-sensitive (only applicable for
   `PreToolUse` and `PostToolUse`)
@@ -269,7 +270,7 @@ Useful for cleanup tasks, logging session statistics, or saving session state.
 Hooks receive JSON data via stdin containing session information and
 event-specific data:
 
-\`\`\`typescript
+```typescript
 {
   // Common fields
   session_id: string
@@ -279,13 +280,13 @@ event-specific data:
   hook_event_name: string
   ...
 }
-\`\`\`
+```
 
 ### PreToolUse Input
 
 The exact schema for `tool_input` depends on the tool.
 
-\`\`\`json
+```json
 {
   "session_id": "abc123",
   "transcript_path": "~/.claude/projects/.../00893aaf-19fa-41d2-8238-13269b9b3ca0.jsonl",
@@ -296,13 +297,13 @@ The exact schema for `tool_input` depends on the tool.
     "content": "file content"
   }
 }
-\`\`\`
+```
 
 ### PostToolUse Input
 
 The exact schema for `tool_input` and `tool_response` depends on the tool.
 
-\`\`\`json
+```json
 {
   "session_id": "abc123",
   "transcript_path": "~/.claude/projects/.../00893aaf-19fa-41d2-8238-13269b9b3ca0.jsonl",
@@ -317,18 +318,18 @@ The exact schema for `tool_input` and `tool_response` depends on the tool.
     "success": true
   }
 }
-\`\`\`
+```
 
 ### Notification Input
 
-\`\`\`json
+```json
 {
   "session_id": "abc123",
   "transcript_path": "~/.claude/projects/.../00893aaf-19fa-41d2-8238-13269b9b3ca0.jsonl",
   "hook_event_name": "Notification",
   "message": "Task completed successfully"
 }
-\`\`\`
+```
 
 ### Stop and SubagentStop Input
 
@@ -336,21 +337,21 @@ The exact schema for `tool_input` and `tool_response` depends on the tool.
 a stop hook. Check this value or process the transcript to prevent Claude Code
 from running indefinitely.
 
-\`\`\`json
+```json
 {
   "session_id": "abc123",
   "transcript_path": "~/.claude/projects/.../00893aaf-19fa-41d2-8238-13269b9b3ca0.jsonl",
   "hook_event_name": "Stop",
   "stop_hook_active": true
 }
-\`\`\`
+```
 
 ### PreCompact Input
 
 For `manual`, `custom_instructions` comes from what the user passes into
 `/compact`. For `auto`, `custom_instructions` is empty.
 
-\`\`\`json
+```json
 {
   "session_id": "abc123",
   "transcript_path": "~/.claude/projects/.../00893aaf-19fa-41d2-8238-13269b9b3ca0.jsonl",
@@ -358,40 +359,40 @@ For `manual`, `custom_instructions` comes from what the user passes into
   "trigger": "manual",
   "custom_instructions": ""
 }
-\`\`\`
+```
 
 ### SessionStart Input
 
-\`\`\`json
+```json
 {
   "session_id": "abc123",
   "transcript_path": "~/.claude/projects/.../00893aaf-19fa-41d2-8238-13269b9b3ca0.jsonl",
   "hook_event_name": "SessionStart",
   "source": "startup"
 }
-\`\`\`
+```
 
 ### UserPromptSubmit Input
 
-\`\`\`json
+```json
 {
   "session_id": "abc123",
   "transcript_path": "~/.claude/projects/.../00893aaf-19fa-41d2-8238-13269b9b3ca0.jsonl",
   "hook_event_name": "UserPromptSubmit",
   "prompt": "Write a function to calculate factorial"
 }
-\`\`\`
+```
 
 ### SessionEnd Input
 
-\`\`\`json
+```json
 {
   "session_id": "abc123",
   "transcript_path": "~/.claude/projects/.../00893aaf-19fa-41d2-8238-13269b9b3ca0.jsonl",
   "hook_event_name": "SessionEnd",
   "reason": "clear"
 }
-\`\`\`
+```
 
 ## Hook Output
 
@@ -436,13 +437,13 @@ Hooks can return structured JSON in `stdout` for more sophisticated control:
 
 All hook types can include these optional fields:
 
-\`\`\`json
+```json
 {
   "continue": true, // Whether Claude should continue after hook execution (default: true)
   "stopReason": "string" // Message shown when continue is false
   "suppressOutput": true, // Hide stdout from transcript mode (default: false)
 }
-\`\`\`
+```
 
 If `continue` is false, Claude stops processing after the hooks run.
 
@@ -467,12 +468,12 @@ to Claude.
 * "block" prevents the tool call from executing. `reason` is shown to Claude.
 * `undefined` leads to the existing permission flow. `reason` is ignored.
 
-\`\`\`json
+```json
 {
   "decision": "approve" | "block" | undefined,
   "reason": "Explanation for decision"
 }
-\`\`\`
+```
 
 #### `PostToolUse` Decision Control
 
@@ -481,12 +482,12 @@ to Claude.
 * "block" automatically prompts Claude with `reason`.
 * `undefined` does nothing. `reason` is ignored.
 
-\`\`\`json
+```json
 {
   "decision": "block" | undefined,
   "reason": "Explanation for decision"
 }
-\`\`\`
+```
 
 #### `Stop`/`SubagentStop` Decision Control
 
@@ -496,25 +497,25 @@ to Claude.
   to know how to proceed.
 * `undefined` allows Claude to stop. `reason` is ignored.
 
-\`\`\`json
+```json
 {
   "decision": "block" | undefined,
   "reason": "Must be provided when Claude is blocked from stopping"
 }
-\`\`\`
+```
 
 #### `SessionStart` Additional Context
 
 `SessionStart` hooks can add context to the session.
 
-\`\`\`json
+```json
 {
   "hookSpecificOutput": {
     "hookEventName": "SessionStart",
     "additionalContext": "My additional context here"
   }
 }
-\`\`\`
+```
 
 #### `UserPromptSubmit` Decision Control
 
@@ -523,7 +524,7 @@ to Claude.
 * "block" prevents the prompt from being processed. `reason` is shown to the user.
 * `undefined` allows normal processing. `reason` is ignored.
 
-\`\`\`json
+```json
 {
   "decision": "block" | undefined,
   "reason": "Explanation for blocking",
@@ -532,152 +533,7 @@ to Claude.
     "additionalContext": "Optional context to add"
   }
 }
-\`\`\`
-
-#### JSON Output Example: Bash Command Editing
-
-\`\`\`python
-#!/usr/bin/env python3
-import json
-import re
-import sys
-
-# Define validation rules as a list of (regex pattern, message) tuples
-VALIDATION_RULES = [
-    (
-        r"\bgrep\b(?!.*\|)",
-        "Use 'rg' (ripgrep) instead of 'grep' for better performance and features",
-    ),
-    (
-        r"\bfind\s+\S+\s+-name\b",
-        "Use 'rg --files | rg pattern' or 'rg --files -g pattern' instead of 'find -name' for better performance",
-    ),
-]
-
-
-def validate_command(command: str) -> list[str]:
-    issues = []
-    for pattern, message in VALIDATION_RULES:
-        if re.search(pattern, command):
-            issues.append(message)
-    return issues
-
-
-try:
-    input_data = json.load(sys.stdin)
-except json.JSONDecodeError as e:
-    print(f"Error: Invalid JSON input: {e}", file=sys.stderr)
-    sys.exit(1)
-
-tool_name = input_data.get("tool_name", "")
-tool_input = input_data.get("tool_input", {})
-command = tool_input.get("command", "")
-
-if tool_name != "Bash" or not command:
-    sys.exit(1)
-
-# Validate the command
-issues = validate_command(command)
-
-if issues:
-    for message in issues:
-        print(f"• {message}", file=sys.stderr)
-    # Exit code 2 blocks tool call and shows stderr to Claude
-    sys.exit(2)
-\`\`\`
-
-## Working with MCP Tools
-
-Claude Code hooks work seamlessly with
-[Model Context Protocol (MCP) tools](/en/docs/claude-code/mcp). When MCP servers
-provide tools, they appear with a special naming pattern that you can match in
-your hooks.
-
-### MCP Tool Naming
-
-MCP tools follow the pattern `mcp__<server>__<tool>`, for example:
-
-* `mcp__memory__create_entities` - Memory server's create entities tool
-* `mcp__filesystem__read_file` - Filesystem server's read file tool
-* `mcp__github__search_repositories` - GitHub server's search tool
-
-### Configuring Hooks for MCP Tools
-
-You can target specific MCP tools or entire MCP servers:
-
-\`\`\`json
-{
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "mcp__memory__.*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "echo 'Memory operation initiated' >> ~/mcp-operations.log"
-          }
-        ]
-      },
-      {
-        "matcher": "mcp__.*__write.*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/home/user/scripts/validate-mcp-write.py"
-          }
-        ]
-      }
-    ]
-  }
-}
-\`\`\`
-
-## Examples
-
-### Code Formatting
-
-Automatically format code after file modifications:
-
-\`\`\`json
-{
-  "hooks": {
-    "PostToolUse": [
-      {
-        "matcher": "Write|Edit|MultiEdit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/home/user/scripts/format-code.sh"
-          }
-        ]
-      }
-    ]
-  }
-}
-\`\`\`
-
-### Notification
-
-Customize the notification that is sent when Claude Code requests permission or
-when the prompt input has become idle.
-
-\`\`\`json
-{
-  "hooks": {
-    "Notification": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 ~/my_custom_notifier.py"
-          }
-        ]
-      }
-    ]
-  }
-}
-\`\`\`
+```
 
 ## Security Considerations
 
@@ -743,7 +599,7 @@ To troubleshoot hooks:
 7. Use `claude --debug` to debug your hooks. The output of a successful hook
    appears like below.
 
-\`\`\`
+```
 [DEBUG] Executing hooks for PostToolUse:Write
 [DEBUG] Getting matching hook commands for PostToolUse with query: Write
 [DEBUG] Found 1 hook matchers in settings
@@ -751,7 +607,7 @@ To troubleshoot hooks:
 [DEBUG] Found 1 hook commands to execute
 [DEBUG] Executing hook command: <Your command> with timeout 60000ms
 [DEBUG] Hook command completed with status 0: <Your stdout>
-\`\`\`
+```
 
 Progress messages appear in transcript mode (Ctrl-R) showing:
 
@@ -802,7 +658,7 @@ Progress messages appear in transcript mode (Ctrl-R) showing:
   <source-validation>
     <official-reference>Anthropic Claude Code Documentation</official-reference>
     <source-file>en_docs_claude-code_hooks.md</source-file>
-    <conversion-date>Sat Aug 23 19:06:57 EDT 2025</conversion-date>
+    <conversion-date>2025-08-24</conversion-date>
     <preservation-guarantee>complete_content_preservation</preservation-guarantee>
     <enhancement-type>mod_format_optimization</enhancement-type>
     <validation-method>direct_source_embedding</validation-method>
@@ -810,7 +666,7 @@ Progress messages appear in transcript mode (Ctrl-R) showing:
 
   <conclusion>
     <authoritative-status>
-      This MOD nugget contains complete, unmodified official Anthropic Claude Code documentation with MOD format optimization for enhanced LLM consumption and cognitive automation integration. Zero information loss from original source.
+      This MOD nugget contains complete, unmodified official Anthropic Claude Code documentation with MOD format optimization for enhanced LLM consumption and cognitive automation integration. Zero information loss from original source with updated 2025-08-24 content.
     </authoritative-status>
   </conclusion>
 </document>

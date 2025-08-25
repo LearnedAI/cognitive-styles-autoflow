@@ -233,28 +233,64 @@ function Switch-ToMode {
     return $true
 }
 
-function Send-StyleCommand {
-    param([string]$Style)
+function Send-SlashCommand {
+    param(
+        [string]$Command,
+        [string]$LogContext = "SLASH COMMAND"
+    )
     
-    Write-ServiceLog "STYLE COMMAND: Sending /output-style $Style"
+    Write-ServiceLog "$LogContext`: Sending $Command"
     
     if (-not (Focus-WindowsTerminal)) {
         return $false
     }
     
-    $command = "/output-style $Style"
-    
+    # ENHANCED CLIPBOARD SAFETY: Multiple clears and longer waits
+    [System.Windows.Forms.Clipboard]::Clear()
+    Start-Sleep -Milliseconds 100
     [System.Windows.Forms.Clipboard]::Clear()
     Start-Sleep -Milliseconds 50
-    [System.Windows.Forms.Clipboard]::SetText($command)
-    Start-Sleep -Milliseconds 50
     
-    [System.Windows.Forms.SendKeys]::SendWait("^v")
-    Start-Sleep -Milliseconds 50
-    [System.Windows.Forms.SendKeys]::SendWait("{ENTER}")
+    try {
+        [System.Windows.Forms.Clipboard]::SetText($Command)
+        Write-ServiceLog "Clipboard set to: $Command"
+        
+        Start-Sleep -Milliseconds 100
+        
+        [System.Windows.Forms.SendKeys]::SendWait("^v")
+        Write-ServiceLog "Command pasted via Ctrl+V"
+        
+        Start-Sleep -Milliseconds 100
+        [System.Windows.Forms.SendKeys]::SendWait("{ENTER}")
+        Write-ServiceLog "Enter key sent - command executed"
+        
+        # IMPORTANT: Clear clipboard after use to prevent contamination
+        Start-Sleep -Milliseconds 100
+        [System.Windows.Forms.Clipboard]::Clear()
+        
+        Write-ServiceLog "$LogContext SENT: $Command" "SUCCESS"
+        return $true
+    }
+    catch {
+        Write-ServiceLog "Failed to send slash command '$Command': $($_.Exception.Message)" "ERROR"
+        return $false
+    }
+    finally {
+        # Ensure clipboard is cleared even on error
+        try {
+            [System.Windows.Forms.Clipboard]::Clear()
+        }
+        catch {
+            Write-ServiceLog "Warning: Could not clear clipboard" "WARN"
+        }
+    }
+}
+
+function Send-StyleCommand {
+    param([string]$Style)
     
-    Write-ServiceLog "STYLE COMMAND SENT: $command" "SUCCESS"
-    return $true
+    $command = "/output-style $Style"
+    return Send-SlashCommand -Command $command -LogContext "STYLE COMMAND"
 }
 
 function Send-ContinuationCommand {
@@ -268,14 +304,22 @@ function Send-ContinuationCommand {
     
     $continueCommand = "continue with next step"
     
+    # ENHANCED CLIPBOARD SAFETY: Multiple clears and longer waits
+    [System.Windows.Forms.Clipboard]::Clear()
+    Start-Sleep -Milliseconds 100
     [System.Windows.Forms.Clipboard]::Clear()
     Start-Sleep -Milliseconds 50
+    
     [System.Windows.Forms.Clipboard]::SetText($continueCommand)
-    Start-Sleep -Milliseconds 50
+    Start-Sleep -Milliseconds 100
     
     [System.Windows.Forms.SendKeys]::SendWait("^v")
-    Start-Sleep -Milliseconds 50
+    Start-Sleep -Milliseconds 100
     [System.Windows.Forms.SendKeys]::SendWait("{ENTER}")
+    
+    # IMPORTANT: Clear clipboard after use to prevent contamination
+    Start-Sleep -Milliseconds 100
+    [System.Windows.Forms.Clipboard]::Clear()
     
     Write-ServiceLog "CONTINUATION SENT: $continueCommand" "SUCCESS"
     return $true
@@ -343,6 +387,129 @@ function Execute-CoordinatedWorkflow {
     }
 }
 
+function Get-CommandType {
+    param([string]$SignalName)
+    
+    # Define command mappings
+    $cognitiveStyles = @("think", "plan", "build", "explore", "test", "review", "mapper")
+    $builtinSlashCommands = @("context", "help", "prime", "compact")
+    $modeCommands = @("normal-mode", "accept-mode", "plan-mode", "bypass-mode", "check-mode", "reset-mode")
+    
+    if ($SignalName -in $cognitiveStyles) {
+        return @{
+            Type = "cognitive-style"
+            Command = "/output-style $SignalName"
+            Handler = "Execute-CoordinatedWorkflow"
+        }
+    }
+    elseif ($SignalName -in $builtinSlashCommands) {
+        return @{
+            Type = "builtin-slash-command"
+            Command = "/$SignalName"
+            Handler = "Execute-SlashCommand"
+        }
+    }
+    elseif ($SignalName -in $modeCommands) {
+        return @{
+            Type = "mode-command"
+            Command = $SignalName
+            Handler = "Execute-ModeCommand"
+        }
+    }
+    elseif ($SignalName.StartsWith("/")) {
+        # Direct slash command
+        return @{
+            Type = "direct-slash-command"
+            Command = $SignalName
+            Handler = "Execute-SlashCommand"
+        }
+    }
+    else {
+        return @{
+            Type = "unknown"
+            Command = $SignalName
+            Handler = $null
+        }
+    }
+}
+
+function Execute-UniversalCommand {
+    param([string]$SignalName)
+    
+    Write-ServiceLog "SIMPLE COMMAND PROCESSING: '$SignalName'"
+    
+    # Simple hardcoded replacements - much easier!
+    if ($SignalName -eq "context") {
+        Write-ServiceLog "EXECUTING: /context command"
+        return Send-SlashCommand -Command "/context" -LogContext "CONTEXT COMMAND"
+    }
+    elseif ($SignalName -eq "help") {
+        Write-ServiceLog "EXECUTING: /help command" 
+        return Send-SlashCommand -Command "/help" -LogContext "HELP COMMAND"
+    }
+    elseif ($SignalName -eq "prime") {
+        Write-ServiceLog "EXECUTING: /prime command"
+        return Send-SlashCommand -Command "/prime" -LogContext "PRIME COMMAND"
+    }
+    elseif ($SignalName -eq "compact") {
+        Write-ServiceLog "EXECUTING: /compact command"
+        return Send-SlashCommand -Command "/compact" -LogContext "COMPACT COMMAND"
+    }
+    elseif ($SignalName -in @("think", "plan", "build", "explore", "test", "review", "mapper")) {
+        Write-ServiceLog "EXECUTING: Coordinated workflow for '$SignalName'"
+        return Execute-CoordinatedWorkflow -Style $SignalName
+    }
+    else {
+        Write-ServiceLog "UNKNOWN COMMAND: '$SignalName'" "WARN"
+        return $false
+    }
+}
+
+function Parse-SignalContent {
+    param(
+        [string]$Content,
+        [string]$SignalName
+    )
+    
+    $Content = $Content.Trim()
+    Write-ServiceLog "PARSING: '$Content' from signal '$SignalName'"
+    
+    # Parse based on signal content format
+    if ($Content -like "Style change request:*") {
+        # Extract: "Style change request: build" → "build"
+        $command = $Content -replace "Style change request:\s*", ""
+        Write-ServiceLog "PARSED as cognitive style: '$command'"
+        return $command.Trim()
+    }
+    elseif ($Content -like "Builtin slash command:*") {
+        # Extract: "Builtin slash command: context" → "context" 
+        $command = $Content -replace "Builtin slash command:\s*", ""
+        Write-ServiceLog "PARSED as builtin slash command: '$command'"
+        return $command.Trim()
+    }
+    elseif ($Content -like "Direct slash command:*") {
+        # Extract: "Direct slash command: /help" → "/help"
+        $command = $Content -replace "Direct slash command:\s*", ""
+        Write-ServiceLog "PARSED as direct slash command: '$command'"
+        return $command.Trim()
+    }
+    elseif ($Content -like "Mode change request:*") {
+        # Extract: "Mode change request: normal-mode" → "normal-mode"
+        $command = $Content -replace "Mode change request:\s*", ""
+        Write-ServiceLog "PARSED as mode command: '$command'"
+        return $command.Trim()
+    }
+    else {
+        # Fallback to signal filename
+        Write-ServiceLog "PARSED as fallback (unknown format): '$SignalName'" "WARN"
+        return $SignalName
+    }
+}
+
+function Execute-ContextCommand {
+    return Send-SlashCommand -Command "/context" -LogContext "CONTEXT COMMAND"
+}
+
 function Process-Signals {
     # RACE CONDITION PREVENTION: Use global lock for entire signal processing
     if (Test-Path $globalLock) {
@@ -379,15 +546,8 @@ function Process-Signals {
                 Move-Item $file.FullName $processedFile -Force
                 Write-ServiceLog "Signal moved to: $processedFile"
                 
-                # Determine if this is a coordinated style or simple mode change
-                $coordinatedStyles = @("think", "plan", "build", "explore", "test", "review")
-                
-                if ($signalName -in $coordinatedStyles) {
-                    Write-ServiceLog "EXECUTING: Coordinated workflow for '$signalName'"
-                    Execute-CoordinatedWorkflow -Style $signalName
-                } else {
-                    Write-ServiceLog "Simple mode command: $signalName (not implemented in this version)" "WARN"
-                }
+                # Use simple command processing based on signal filename
+                Execute-UniversalCommand -SignalName $signalName
             }
             catch {
                 Write-ServiceLog "Failed to process signal '$signalName': $($_.Exception.Message)" "ERROR"

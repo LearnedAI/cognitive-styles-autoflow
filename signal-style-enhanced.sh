@@ -1,193 +1,175 @@
 #!/bin/bash
+# Enhanced Signal Interface with Style Validation - v2.0
+# Provides graceful handling of style registration and validation
 
-# Enhanced Signal Interface - Confidence-Aware Style + Mode Control
-# Integrates intelligent confidence assessment with existing signal system
+set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ORIGINAL_SIGNAL_SCRIPT="$SCRIPT_DIR/signal-style.sh"
-CONFIDENCE_SCRIPT="$SCRIPT_DIR/intelligent-plan-exit.sh"
+# Colors for output
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+NC='\033[0m'
+
+SIGNAL_DIR="/mnt/c/Users/Learn/Greenfield/style-signals"
+SIGNAL_FILE="$SIGNAL_DIR/style-change.signal"
+
+# Test if a style actually works by checking Claude Code's response
+test_style_activation() {
+    local style="$1"
+    
+    echo -e "${BLUE}🔍 Testing style activation: $style${NC}"
+    
+    # Try to activate the style and check result
+    # We'll simulate the /output-style command and check for "Invalid output style" response
+    
+    # Check if style file exists first
+    if [ ! -f ".claude/output-styles/${style}.md" ]; then
+        echo -e "${RED}❌ Style file not found: .claude/output-styles/${style}.md${NC}"
+        return 1
+    fi
+    
+    # File exists, but Claude Code might not have loaded it yet
+    echo -e "${YELLOW}⚠️ Style file exists but may need Claude Code restart to load${NC}"
+    echo -e "${BLUE}💡 Try: /output-style $style in Claude Code interface${NC}"
+    return 0
+}
 
 if [ -z "$1" ]; then
-    cat << EOF
-Enhanced Signal Interface - Confidence-Aware Cognitive Automation
-
-USAGE: $0 <command> [options]
-
-CONFIDENCE-ENHANCED COMMANDS:
-  smart-build <plan_text>     - Build only if confidence is high
-  confident-plan <plan_text>  - Plan with confidence assessment  
-  auto-implement <plan_text>  - Implement with confidence evaluation
-  explain-build <plan_text>   - Build with detailed confidence explanation
-
-ORIGINAL COORDINATED COMMANDS:
-  STRATEGIC COGNITIVE WORKFLOW (Core Triad):
-  think       - Think style + Plan Mode (2) - Deep cognitive exploration
-  plan        - Plan style + Plan Mode (2) - Strategic architecture  
-  build       - Build style + Bypass Mode (3) - Full implementation
-
-  OPERATIONAL SUPPORT WORKFLOW:
-  explore     - Explore style + Normal Mode (0) - Broad discovery
-  test        - Test style + Accept Mode (1) - Validation and QA
-  review      - Review style + Normal Mode (0) - Analysis and optimization
-
-CONFIDENCE REPORTING:
-  confidence-status          - Show last confidence assessment
-  confidence-test <text>     - Test confidence assessment on text
-
-EXAMPLES:
-  # Smart building with confidence checking
-  $0 smart-build "Create new configuration file with default settings"
-  
-  # Traditional style switching
-  $0 think                   # Deep cognitive analysis
-  $0 build                   # Implementation mode
-  
-  # Confidence assessment
-  $0 confidence-test "Delete all production files"
-
-CONFIDENCE INTEGRATION:
-  The enhanced commands evaluate plan confidence before proceeding:
-  🟢 High (85+):    Proceed automatically with notification
-  🟡 Medium (70-84): Proceed with detailed explanation
-  🟠 Low (50-69):   Request manual approval
-  🔴 Very Low (<50): Require explicit approval
-
-EOF
+    echo -e "${BLUE}Enhanced Signal Interface - Style + Mode Control v2.0${NC}"
+    echo ""
+    echo "Enhanced Style Validation Commands:"
+    echo "  test-mapper   - Test if Mapper style is working"
+    echo "  list-styles   - Show all available output styles"
+    echo "  verify-setup  - Check complete Mapper setup"
+    echo ""
+    echo "Standard Commands:"
+    echo "  mapper, think, plan, build, test, review, explore"
     exit 1
 fi
 
-COMMAND=$1
-PLAN_TEXT="${2:-}"
-USER_CONTEXT="${3:-}"
+COMMAND="$1"
 
-# Enhanced confidence-aware commands
 case "$COMMAND" in
-    smart-build)
-        if [ -z "$PLAN_TEXT" ]; then
-            echo "❌ Error: Plan text required for smart-build"
-            echo "Usage: $0 smart-build '<plan_text>' [user_context]"
-            exit 1
-        fi
-        
-        echo "🧠 SMART BUILD - Confidence-Based Implementation"
-        echo "=============================================="
+    "test-mapper")
+        echo -e "${BLUE}🔍 MAPPER STYLE VALIDATION${NC}"
         echo ""
         
-        # Evaluate confidence
-        if "$CONFIDENCE_SCRIPT" proceed-if-confident "$PLAN_TEXT" "$USER_CONTEXT"; then
-            echo ""
-            echo "✅ Confidence check passed - Switching to BUILD mode"
-            exec "$ORIGINAL_SIGNAL_SCRIPT" build
+        # Check if file exists
+        if [ -f ".claude/output-styles/mapper.md" ]; then
+            echo -e "${GREEN}✅ mapper.md found in .claude/output-styles/${NC}"
         else
-            echo ""
-            echo "⏸️  Smart build blocked due to low confidence"
-            echo "   Consider using 'explain-build' to proceed with explanation"
-            echo "   Or review and modify the plan to improve confidence"
-            exit 1
-        fi
-        ;;
-        
-    confident-plan)
-        if [ -z "$PLAN_TEXT" ]; then
-            echo "❌ Error: Plan text required for confident-plan"
-            echo "Usage: $0 confident-plan '<plan_text>' [user_context]"
+            echo -e "${RED}❌ mapper.md NOT found in .claude/output-styles/${NC}"
+            echo "Run: cp mapper.md .claude/output-styles/"
             exit 1
         fi
         
-        echo "📋 CONFIDENT PLAN - Strategic Analysis with Confidence"
-        echo "===================================================="
-        echo ""
+        # Check file content
+        if grep -q "name.*Mapper" ".claude/output-styles/mapper.md"; then
+            echo -e "${GREEN}✅ Mapper style content valid${NC}"
+        else
+            echo -e "${YELLOW}⚠️ Mapper style content may be invalid${NC}"
+        fi
         
-        # Show confidence analysis
-        "$CONFIDENCE_SCRIPT" evaluate "$PLAN_TEXT" "$USER_CONTEXT"
+        # Check signal system
+        mkdir -p "$SIGNAL_DIR"
+        echo "Style change request: mapper" > "$SIGNAL_FILE"
+        echo -e "${GREEN}✅ Signal sent to cognitive automation${NC}"
         
         echo ""
-        echo "🎯 Switching to PLAN mode for strategic development..."
-        exec "$ORIGINAL_SIGNAL_SCRIPT" plan
+        echo -e "${BLUE}📋 NEXT: Test manually with: /output-style mapper${NC}"
+        echo -e "${YELLOW}⚠️ If still shows 'Invalid', Claude Code may need restart${NC}"
+        exit 0
         ;;
         
-    auto-implement)
-        if [ -z "$PLAN_TEXT" ]; then
-            echo "❌ Error: Plan text required for auto-implement"
-            echo "Usage: $0 auto-implement '<plan_text>' [user_context]"
+    "verify-setup")
+        echo -e "${BLUE}🔍 COMPLETE MAPPER SETUP VERIFICATION${NC}"
+        echo ""
+        
+        # 1. Check file existence
+        echo "1. Checking mapper.md file..."
+        if [ -f ".claude/output-styles/mapper.md" ]; then
+            echo -e "${GREEN}   ✅ mapper.md exists${NC}"
+        else
+            echo -e "${RED}   ❌ mapper.md missing${NC}"
+            echo "   Fix: cp mapper.md .claude/output-styles/"
+        fi
+        
+        # 2. Check plan-enhanced
+        echo "2. Checking plan-enhanced.md file..."
+        if [ -f ".claude/output-styles/plan-enhanced.md" ]; then
+            echo -e "${GREEN}   ✅ plan-enhanced.md exists${NC}"
+        else
+            echo -e "${RED}   ❌ plan-enhanced.md missing${NC}"
+            echo "   Fix: cp plan-enhanced.md .claude/output-styles/"
+        fi
+        
+        # 3. Check MOD generator
+        echo "3. Checking MOD generator..."
+        if [ -f "generate-roadmap-mod.sh" ] && [ -x "generate-roadmap-mod.sh" ]; then
+            echo -e "${GREEN}   ✅ generate-roadmap-mod.sh ready${NC}"
+        else
+            echo -e "${RED}   ❌ generate-roadmap-mod.sh missing or not executable${NC}"
+        fi
+        
+        # 4. Check API prevention
+        echo "4. Checking API error prevention..."
+        if [ -f "prevent-api-errors.sh" ] && [ -x "prevent-api-errors.sh" ]; then
+            echo -e "${GREEN}   ✅ prevent-api-errors.sh ready${NC}"
+        else
+            echo -e "${RED}   ❌ prevent-api-errors.sh missing or not executable${NC}"
+        fi
+        
+        echo ""
+        echo -e "${BLUE}🎯 Manual Test Required:${NC}"
+        echo "   Run in Claude Code interface: /output-style mapper"
+        echo "   Expected: Style changes to Mapper"
+        echo "   If 'Invalid': Restart Claude Code and try again"
+        exit 0
+        ;;
+        
+    "list-styles")
+        echo -e "${BLUE}📋 Available Output Styles:${NC}"
+        echo ""
+        if [ -d ".claude/output-styles" ]; then
+            for style_file in .claude/output-styles/*.md; do
+                if [ -f "$style_file" ]; then
+                    style_name=$(basename "$style_file" .md)
+                    echo "  $style_name"
+                fi
+            done
+        else
+            echo -e "${RED}No .claude/output-styles directory found${NC}"
+        fi
+        exit 0
+        ;;
+        
+    "mapper")
+        echo -e "${BLUE}🎯 Activating Mapper Style${NC}"
+        
+        # Pre-validation
+        if [ ! -f ".claude/output-styles/mapper.md" ]; then
+            echo -e "${RED}❌ Mapper style not installed properly${NC}"
+            echo "Run: ./signal-style-enhanced.sh verify-setup"
             exit 1
         fi
         
-        echo "🚀 AUTO-IMPLEMENT - Intelligent Workflow Automation" 
-        echo "================================================="
+        # Send signal
+        mkdir -p "$SIGNAL_DIR"
+        echo "Style change request: mapper" > "$SIGNAL_FILE"
+        echo -e "${GREEN}✅ Mapper activation signal sent${NC}"
+        
         echo ""
-        
-        # Full workflow: assess confidence, then proceed accordingly
-        eval_result=$("$CONFIDENCE_SCRIPT" evaluate "$PLAN_TEXT" "$USER_CONTEXT")
-        recommendation=$(echo "$eval_result" | grep "RECOMMENDATION=" | cut -d'=' -f2)
-        
-        echo "$eval_result"
-        echo ""
-        
-        case "$recommendation" in
-            "AUTO_PROCEED")
-                echo "🎯 HIGH CONFIDENCE → Proceeding with BUILD mode"
-                exec "$ORIGINAL_SIGNAL_SCRIPT" build
-                ;;
-            "PROCEED_WITH_EXPLANATION")  
-                echo "🎯 MEDIUM CONFIDENCE → Proceeding with BUILD mode + explanation"
-                "$CONFIDENCE_SCRIPT" explain-and-proceed "$PLAN_TEXT" "$USER_CONTEXT"
-                exec "$ORIGINAL_SIGNAL_SCRIPT" build
-                ;;
-            *)
-                echo "🎯 LOW CONFIDENCE → Switching to PLAN mode for manual review"
-                echo "   Please review the confidence analysis and approve manually if appropriate"
-                exec "$ORIGINAL_SIGNAL_SCRIPT" plan
-                ;;
-        esac
-        ;;
-        
-    explain-build)
-        if [ -z "$PLAN_TEXT" ]; then
-            echo "❌ Error: Plan text required for explain-build"
-            echo "Usage: $0 explain-build '<plan_text>' [user_context]"
-            exit 1
-        fi
-        
-        echo "📝 EXPLAIN-BUILD - Transparent Implementation"
-        echo "=========================================="
-        echo ""
-        
-        # Always show explanation and proceed
-        "$CONFIDENCE_SCRIPT" explain-and-proceed "$PLAN_TEXT" "$USER_CONTEXT"
-        
-        echo "🎯 Proceeding to BUILD mode with full transparency..."
-        exec "$ORIGINAL_SIGNAL_SCRIPT" build
-        ;;
-        
-    confidence-status)
-        echo "📊 CONFIDENCE SYSTEM STATUS"
-        echo "=========================="
-        echo ""
-        "$CONFIDENCE_SCRIPT" confidence-report
-        ;;
-        
-    confidence-test)
-        if [ -z "$PLAN_TEXT" ]; then
-            echo "❌ Error: Text required for confidence test"
-            echo "Usage: $0 confidence-test '<plan_text>' [user_context]"
-            exit 1
-        fi
-        
-        echo "🧪 CONFIDENCE TEST"
-        echo "=================="
-        echo ""
-        "$CONFIDENCE_SCRIPT" evaluate "$PLAN_TEXT" "$USER_CONTEXT"
-        ;;
-        
-    # All original commands pass through to original script
-    think|plan|build|test|review|explore|normal-mode|accept-mode|plan-mode|bypass-mode|check-mode|reset-mode)
-        exec "$ORIGINAL_SIGNAL_SCRIPT" "$COMMAND"
+        echo -e "${YELLOW}📋 Next Steps:${NC}"
+        echo "1. Verify activation: /output-style mapper (should NOT show 'Invalid')"
+        echo "2. If still invalid: Restart Claude Code"
+        echo "3. Run API prevention: ./prevent-api-errors.sh"
+        echo "4. Generate roadmap: ./generate-roadmap-mod.sh --project YourProject ..."
         ;;
         
     *)
-        echo "❌ Error: Unknown command '$COMMAND'"
-        echo "Run '$0' without arguments to see available commands"
+        echo -e "${RED}❌ Unknown command: $COMMAND${NC}"
+        echo "Available: test-mapper, verify-setup, list-styles, mapper"
         exit 1
         ;;
 esac

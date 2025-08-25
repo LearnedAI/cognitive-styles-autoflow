@@ -2,8 +2,8 @@
 <document type="api-reference" subject="ClaudeCode_SlashCommands">
   <metadata>
     <created>2025-08-23</created>
-    <updated>2025-08-23</updated>
-    <version>1.0.0</version>
+    <updated>2025-08-25</updated>
+    <version>1.1.0</version>
     <scope>complete-system</scope>
     <dependencies>["claude-code"]</dependencies>
     <complexity>4</complexity>
@@ -62,6 +62,7 @@
 | `/clear`                  | Clear conversation history                                                     |
 | `/compact [instructions]` | Compact conversation with optional focus instructions                          |
 | `/config`                 | View/modify configuration                                                      |
+| `/context`                | Display detailed context usage                                                 |
 | `/cost`                   | Show token usage statistics                                                    |
 | `/doctor`                 | Checks the health of your Claude Code installation                             |
 | `/help`                   | Get usage help                                                                 |
